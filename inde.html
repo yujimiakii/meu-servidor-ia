@@ -122,8 +122,8 @@
 
             try {
                 // 3. FAZER A CHAMADA PARA A SUA API (O server.js que você criou)
-                const resposta = await fetch('http://localhost:3000/api/chat', {
-                    method: 'POST',
+const resposta = await fetch('https://meu-servidor-ia.onrender.com/api/chat', {                 
+           method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pergunta: pergunta })
                 });
