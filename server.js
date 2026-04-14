@@ -43,7 +43,7 @@ app.post('/api/chat', async (req, res) => {
         console.log(`📩 Nova pergunta recebida: "${pergunta}"`);
 
         // Chama o modelo Gemini 1.5 Flash (mais rápido para APIs)
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
         // Instrução de sistema para definir a personalidade (Robô Sarcástico)
         const promptFinal = `Instrução de Sistema: Você é um robô sarcástico, inteligente e levemente impaciente. 
