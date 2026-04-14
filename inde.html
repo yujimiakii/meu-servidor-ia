@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório Secreto - IA</title>
+    <style>
+        /* Estilo Hacker / Laboratório */
+        body {
+            background-color: #0d0d0d;
+            color: #39ff14;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #chat-container {
+            width: 80%;
+            max-width: 600px;
+            background: #1a1a1a;
+            border: 2px solid #39ff14;
+            box-shadow: 0 0 20px #39ff14;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #39ff14;
+        }
+
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .user { color: #00ccff; }
+        .ia { color: #39ff14; }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex-grow: 1;
+            background: #000;
+            border: 1px solid #39ff14;
+            color: #39ff14;
+            padding: 10px;
+            outline: none;
+        }
+
+        button {
+            background: #39ff14;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        /* Scrollbar estilizada */
+        #messages::-webkit-scrollbar { width: 5px; }
+        #messages::-webkit-scrollbar-thumb { background: #39ff14; }
+    </style>
+</head>
+<body>
+
+    <h1>🧪 LABORATÓRIO DO CIENTISTA IA 🧪</h1>
+
+    <div id="chat-container">
+        <div id="messages">
+            <div class="message ia"><strong>[CIENTISTA]:</strong> Rápido! O reator está instável! O que você quer perguntar?</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="pergunta" placeholder="Digite sua pergunta aqui..." onkeypress="verificarTecla(event)">
+            <button onclick="enviarPergunta()">ENVIAR</button>
+        </div>
+    </div>
+
+    <script>
+        async function enviarPergunta() {
+            const input = document.getElementById('pergunta');
+            const listaMensagens = document.getElementById('messages');
+            const pergunta = input.value;
+
+            if (!pergunta) return;
+
+            // 1. Mostrar a pergunta do usuário na tela
+            listaMensagens.innerHTML += `<div class="message user"><strong>Você:</strong> ${pergunta}</div>`;
+            input.value = ''; // Limpa o campo
+            listaMensagens.scrollTop = listaMensagens.scrollHeight;
+
+            // 2. Mostrar "Pensando..."
+            const statusId = "status-" + Date.now();
+            listaMensagens.innerHTML += `<div class="message ia" id="${statusId}"><strong>[CIENTISTA]:</strong> Calculando... 🧪</div>`;
+
+            try {
+                // 3. FAZER A CHAMADA PARA A SUA API (O server.js que você criou)
+                const resposta = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pergunta: pergunta })
+                });
+
+                const dados = await resposta.json();
+                const elementoStatus = document.getElementById(statusId);
+
+                if (dados.sucesso) {
+                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ${dados.resposta}`;
+                } else {
+                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ERRO CRÍTICO! ${dados.erro}`;
+                }
+
+            } catch (erro) {
+                console.error(erro);
+                document.getElementById(statusId).innerHTML = `<strong>[CIENTISTA]:</strong> O SERVIDOR EXPLODIU! (Verifique se o server.js está rodando)`;
+            }
+
+            listaMensagens.scrollTop = listaMensagens.scrollHeight;
+        }
+
+        function verificarTecla(event) {
+            if (event.key === 'Enter') {
+                enviarPergunta();
+            }
+        }
+    </script>
+</body>
+</html>
