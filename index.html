@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Secreto - IA</title>
+    <!-- BIBLIOTECA MARKDOWN (Sprint 0) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* Estilo Hacker / Laboratório */
         body {
@@ -29,7 +31,7 @@
             border-radius: 10px;
             display: flex;
             flex-direction: column;
-            height: 70vh;
+            height: 75vh;
         }
 
         h1 {
@@ -83,6 +85,12 @@
             box-shadow: 0 0 15px #fff;
         }
 
+        .btn-limpar {
+            background: #ff4444;
+            color: white;
+            margin-top: 10px;
+        }
+
         /* Scrollbar estilizada */
         #messages::-webkit-scrollbar { width: 5px; }
         #messages::-webkit-scrollbar-thumb { background: #39ff14; }
@@ -101,9 +109,14 @@
             <input type="text" id="pergunta" placeholder="Digite sua pergunta aqui..." onkeypress="verificarTecla(event)">
             <button onclick="enviarPergunta()">ENVIAR</button>
         </div>
+        
+        <!-- BOTÃO DE LIMPAR (Sprint 0) -->
+        <button class="btn-limpar" onclick="limparChat()">🗑️ LIMPAR CONVERSA</button>
     </div>
 
     <script>
+        const URL_API = 'http://localhost:3000/api/chat';
+
         async function enviarPergunta() {
             const input = document.getElementById('pergunta');
             const listaMensagens = document.getElementById('messages');
@@ -111,19 +124,19 @@
 
             if (!pergunta) return;
 
-            // 1. Mostrar a pergunta do usuário na tela
+            // 1. Mostrar a pergunta do usuário
             listaMensagens.innerHTML += `<div class="message user"><strong>Você:</strong> ${pergunta}</div>`;
-            input.value = ''; // Limpa o campo
+            input.value = ''; 
             listaMensagens.scrollTop = listaMensagens.scrollHeight;
 
-            // 2. Mostrar "Pensando..."
+            // 2. Mostrar status de "Calculando..."
             const statusId = "status-" + Date.now();
             listaMensagens.innerHTML += `<div class="message ia" id="${statusId}"><strong>[CIENTISTA]:</strong> Calculando... 🧪</div>`;
 
             try {
-                // 3. FAZER A CHAMADA PARA A SUA API (O server.js que você criou)
-const resposta = await fetch('https://meu-servidor-ia.onrender.com/api/chat', {        
-       method: 'POST',
+                // 3. Chamada para a API
+                const resposta = await fetch(URL_API, {        
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pergunta: pergunta })
                 });
@@ -132,24 +145,41 @@ const resposta = await fetch('https://meu-servidor-ia.onrender.com/api/chat', {
                 const elementoStatus = document.getElementById(statusId);
 
                 if (dados.sucesso) {
-                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ${dados.resposta}`;
+                    // UPGRADE VISUAL: Traduz Markdown para HTML
+                    const respostaFormatada = marked.parse(dados.resposta);
+                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ${respostaFormatada}`;
                 } else {
-                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ERRO CRÍTICO! ${dados.erro}`;
+                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ERRO: ${dados.erro}`;
                 }
 
             } catch (erro) {
                 console.error(erro);
-                document.getElementById(statusId).innerHTML = `<strong>[CIENTISTA]:</strong> O SERVIDOR EXPLODIU! (Verifique se o server.js está rodando)`;
+                document.getElementById(statusId).innerHTML = `<strong>[CIENTISTA]:</strong> O SERVIDOR EXPLODIU!`;
             }
 
             listaMensagens.scrollTop = listaMensagens.scrollHeight;
         }
 
+        // Função para o Enter funcionar
         function verificarTecla(event) {
             if (event.key === 'Enter') {
                 enviarPergunta();
             }
         }
+
+        // Função para limpar o chat (Sprint 0)
+        async function limparChat() {
+            if (!confirm("Deseja resetar o reator e apagar a memória?")) return;
+
+            try {
+                await fetch(`${URL_API}/limpar`, { method: 'DELETE' });
+                document.getElementById('messages').innerHTML = `<div class="message ia"><strong>[CIENTISTA]:</strong> Memória resetada!</div>`;
+                alert("Histórico apagado do MongoDB!");
+            } catch (erro) {
+                alert("Erro ao conectar com o servidor para limpar.");
+            }
+        }
     </script>
+    
 </body>
 </html>
