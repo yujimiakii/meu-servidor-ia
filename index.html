@@ -4,182 +4,257 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Secreto - IA</title>
-    <!-- BIBLIOTECA MARKDOWN (Sprint 0) -->
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Bibliotecas -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
-        /* Estilo Hacker / Laboratório */
+        :root {
+            --primary: #39ff14; /* Verde Neon */
+            --bg-dark: #0a0b0c;
+            --bg-panel: #161b22;
+            --text-color: #e6edf3;
+            --accent: #00d4ff; /* Azul Bio */
+            --danger: #ff4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: #0d0d0d;
-            color: #39ff14;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
             height: 100vh;
-            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
         }
 
-        #chat-container {
-            width: 80%;
-            max-width: 600px;
-            background: #1a1a1a;
-            border: 2px solid #39ff14;
-            box-shadow: 0 0 20px #39ff14;
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            height: 75vh;
+        /* --- TELA DE LOGIN --- */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 11, 12, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(10px);
         }
 
-        h1 {
+        .login-box {
+            background: var(--bg-panel);
+            padding: 40px; border-radius: 15px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
             text-align: center;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px #39ff14;
         }
 
-        #messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #333;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-
-        .user { color: #00ccff; }
-        .ia { color: #39ff14; }
-
-        .input-area {
-            display: flex;
-            gap: 10px;
-        }
-
-        input {
-            flex-grow: 1;
-            background: #000;
-            border: 1px solid #39ff14;
-            color: #39ff14;
-            padding: 10px;
-            outline: none;
+        .login-box h1 { margin-bottom: 20px; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        
+        input[type="text"] {
+            background: #000; border: 1px solid var(--primary);
+            color: var(--primary); padding: 12px; width: 100%;
+            border-radius: 5px; outline: none; font-family: inherit;
         }
 
         button {
-            background: #39ff14;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            background: var(--primary); color: #000; border: none;
+            padding: 12px 25px; border-radius: 5px; cursor: pointer;
+            font-weight: bold; margin-top: 15px; transition: 0.3s; width: 100%;
         }
 
-        button:hover {
-            background: #fff;
-            box-shadow: 0 0 15px #fff;
+        button:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        #main-container {
+            width: 90%; max-width: 900px; height: 85vh;
+            background: var(--bg-panel); border-radius: 15px;
+            border: 1px solid #30363d; display: flex; flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .btn-limpar {
-            background: #ff4444;
-            color: white;
-            margin-top: 10px;
+        .header {
+            padding: 15px 25px; border-bottom: 1px solid #30363d;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Scrollbar estilizada */
-        #messages::-webkit-scrollbar { width: 5px; }
-        #messages::-webkit-scrollbar-thumb { background: #39ff14; }
+        .header h2 { color: var(--primary); font-size: 1.2rem; }
+
+        /* --- ÁREA DE MENSAGENS --- */
+        #chat-window {
+            flex-grow: 1; overflow-y: auto; padding: 25px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .message { max-width: 80%; padding: 15px; border-radius: 10px; line-height: 1.5; position: relative; }
+        
+        .user-message {
+            align-self: flex-end; background: #21262d;
+            border-right: 4px solid var(--accent); color: var(--accent);
+        }
+
+        .ia-message {
+            align-self: flex-start; background: #0d1117;
+            border-left: 4px solid var(--primary); border: 1px solid #30363d;
+        }
+
+        .message-header { font-size: 0.7rem; margin-bottom: 8px; opacity: 0.6; text-transform: uppercase; }
+
+        /* --- INPUT --- */
+        .input-area {
+            padding: 20px; border-top: 1px solid #30363d;
+            display: flex; gap: 10px; background: #0d1117;
+            border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;
+        }
+
+        #pergunta { flex-grow: 1; background: transparent; border: 1px solid #30363d; padding: 15px; color: #fff; border-radius: 8px; }
+
+        .btn-send { width: auto; margin-top: 0; background: var(--primary); }
+
+        /* --- RANKING MODAL --- */
+        #ranking-modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 350px; background: var(--bg-panel); border: 2px solid gold;
+            padding: 25px; border-radius: 15px; z-index: 1000; box-shadow: 0 0 100px #000;
+        }
+
+        .ranking-item {
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-bottom: 1px solid #30363d; font-size: 0.9rem;
+        }
+
+        .gold { color: gold; font-weight: bold; }
+        .hidden { display: none !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>🧪 LABORATÓRIO DO CIENTISTA IA 🧪</h1>
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h1><i class="fas fa-flask"></i> LABORATÓRIO</h1>
+            <p style="margin-bottom: 15px; opacity: 0.7;">Insira suas credenciais de cientista</p>
+            <input type="text" id="nickname" placeholder="Digite seu Nickname..." onkeypress="if(event.key==='Enter') entrarNoSistema()">
+            <button onclick="entrarNoSistema()">ACESSAR SISTEMA</button>
+        </div>
+    </div>
 
-    <div id="chat-container">
-        <div id="messages">
-            <div class="message ia"><strong>[CIENTISTA]:</strong> Rápido! O reator está instável! O que você quer perguntar?</div>
+    <!-- TELA PRINCIPAL -->
+    <div id="main-container">
+        <div class="header">
+            <h2><i class="fas fa-terminal"></i> OVERFLOWIA_OS v2.0</h2>
+            <div>
+                <button onclick="mostrarRanking()" style="width: auto; background: gold; padding: 8px 15px;"><i class="fas fa-trophy"></i> RANKING</button>
+            </div>
+        </div>
+
+        <div id="chat-window">
+            <!-- Mensagens aparecem aqui -->
+            <div class="message ia-message">
+                <div class="message-header">SISTEMA</div>
+                Olá Cientista. O reator está estável. Aguardando comandos...
+            </div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="pergunta" placeholder="Digite sua pergunta aqui..." onkeypress="verificarTecla(event)">
-            <button onclick="enviarPergunta()">ENVIAR</button>
+            <input type="text" id="pergunta" placeholder="Pergunte algo ou tente uma charada..." onkeypress="if(event.key==='Enter') enviarMsg()">
+            <button class="btn-send" onclick="enviarMsg()"><i class="fas fa-paper-plane"></i></button>
         </div>
-        
-        <!-- BOTÃO DE LIMPAR (Sprint 0) -->
-        <button class="btn-limpar" onclick="limparChat()">🗑️ LIMPAR CONVERSA</button>
+    </div>
+
+    <!-- MODAL RANKING -->
+    <div id="ranking-modal" class="hidden">
+        <h2 style="text-align: center; color: gold; margin-bottom: 15px;"><i class="fas fa-crown"></i> HALL DA FAMA</h2>
+        <div id="ranking-corpo"></div>
+        <button onclick="fecharRanking()" style="background: var(--danger); color: white;">FECHAR</button>
     </div>
 
     <script>
-        const URL_API = 'http://localhost:3000/api/chat';
+        let userNick = "";
+        const API_URL = "http://localhost:3000/api";
 
-        async function enviarPergunta() {
+        function entrarNoSistema() {
+            const input = document.getElementById('nickname');
+            if(input.value.trim().length < 3) return alert("Nickname muito curto!");
+            userNick = input.value;
+            document.getElementById('login-screen').classList.add('hidden');
+        }
+
+        async function enviarMsg() {
             const input = document.getElementById('pergunta');
-            const listaMensagens = document.getElementById('messages');
-            const pergunta = input.value;
+            const chatWindow = document.getElementById('chat-window');
+            const texto = input.value.trim();
 
-            if (!pergunta) return;
+            if(!texto) return;
 
-            // 1. Mostrar a pergunta do usuário
-            listaMensagens.innerHTML += `<div class="message user"><strong>Você:</strong> ${pergunta}</div>`;
-            input.value = ''; 
-            listaMensagens.scrollTop = listaMensagens.scrollHeight;
-
-            // 2. Mostrar status de "Calculando..."
-            const statusId = "status-" + Date.now();
-            listaMensagens.innerHTML += `<div class="message ia" id="${statusId}"><strong>[CIENTISTA]:</strong> Calculando... 🧪</div>`;
+            // Renderizar pergunta do usuário
+            chatWindow.innerHTML += `
+                <div class="message user-message">
+                    <div class="message-header">${userNick}</div>
+                    ${texto}
+                </div>
+            `;
+            
+            input.value = "";
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
             try {
-                // 3. Chamada para a API
-                const resposta = await fetch(URL_API, {        
+                const response = await fetch(`${API_URL}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pergunta: pergunta })
+                    body: JSON.stringify({ pergunta: texto, nickname: userNick })
                 });
 
-                const dados = await resposta.json();
-                const elementoStatus = document.getElementById(statusId);
+                const data = await response.json();
 
-                if (dados.sucesso) {
-                    // UPGRADE VISUAL: Traduz Markdown para HTML
-                    const respostaFormatada = marked.parse(dados.resposta);
-                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ${respostaFormatada}`;
-                } else {
-                    elementoStatus.innerHTML = `<strong>[CIENTISTA]:</strong> ERRO: ${dados.erro}`;
+                // Renderizar resposta da IA
+                const htmlResposta = marked.parse(data.resposta);
+                chatWindow.innerHTML += `
+                    <div class="message ia-message">
+                        <div class="message-header">CIENTISTA_IA</div>
+                        ${htmlResposta}
+                    </div>
+                `;
+
+                // Efeito de Confete se ganhar XP
+                if(data.resposta.toLowerCase().includes("acertou") || data.resposta.toLowerCase().includes("ganhou")) {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#39ff14', '#ffffff'] });
                 }
 
-            } catch (erro) {
-                console.error(erro);
-                document.getElementById(statusId).innerHTML = `<strong>[CIENTISTA]:</strong> O SERVIDOR EXPLODIU!`;
+            } catch (err) {
+                chatWindow.innerHTML += `<div class="message" style="color:red">Erro crítico: Servidor offline.</div>`;
             }
-
-            listaMensagens.scrollTop = listaMensagens.scrollHeight;
+            
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // Função para o Enter funcionar
-        function verificarTecla(event) {
-            if (event.key === 'Enter') {
-                enviarPergunta();
-            }
-        }
-
-        // Função para limpar o chat (Sprint 0)
-        async function limparChat() {
-            if (!confirm("Deseja resetar o reator e apagar a memória?")) return;
-
+        async function mostrarRanking() {
             try {
-                await fetch(`${URL_API}/limpar`, { method: 'DELETE' });
-                document.getElementById('messages').innerHTML = `<div class="message ia"><strong>[CIENTISTA]:</strong> Memória resetada!</div>`;
-                alert("Histórico apagado do MongoDB!");
-            } catch (erro) {
-                alert("Erro ao conectar com o servidor para limpar.");
-            }
+                const res = await fetch(`${API_URL}/ranking`);
+                const jogadores = await res.json();
+                const corpo = document.getElementById('ranking-corpo');
+
+                corpo.innerHTML = jogadores.map((j, i) => `
+                    <div class="ranking-item ${i === 0 ? 'gold' : ''}">
+                        <span>${i+1}º ${j.nickname}</span>
+                        <span>${j.xp} XP</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('ranking-modal').classList.remove('hidden');
+            } catch (err) { alert("Não foi possível carregar o ranking."); }
+        }
+
+        function fecharRanking() {
+            document.getElementById('ranking-modal').classList.add('hidden');
         }
     </script>
-    
 </body>
 </html>

@@ -52,6 +52,58 @@ function gerarRelatorioPDF(pergunta, resposta, numeroRelatorio) {
         stream.on('error', reject);
     });
 }
+async function enviarMsgChat() {
+    // Pegamos o nome do usuário que está logado no LocalStorage
+    const nickname = localStorage.getItem('userName') || "Jogador Anonimo";
+    const msgDigitada = chatTextArea.value.trim();
+    if (!msgDigitada) return;
+
+    // 1. Mostrar mensagem do usuário na tela
+    msgArea.insertAdjacentHTML('beforeend', `
+        <article class="message user-message" style="margin-top:20px;">
+            <div class="message-content"> <p>${msgDigitada}</p> </div>
+        </article>`);
+
+    chatTextArea.value = '';
+    msgArea.scrollTop = msgArea.scrollHeight;
+
+    // 2. Feedback de Carregamento
+    chatInputBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    chatInputBtn.disabled = true;
+
+    try {
+        // 3. Chamada para o seu Back-end no Render
+        const response = await fetch('https://SUA-URL-DO-RENDER.com/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensagem: msgDigitada, nickname: nickname })
+        });
+
+        const data = await response.json();
+
+        // 4. Mostrar resposta da IA
+        msgArea.insertAdjacentHTML('beforeend', `
+        <article class="message ai-message">
+            <div class="avatar-ai"><i class="fas fa-robot"></i></div>
+            <div class="message-content">
+                <p>${data.texto}</p>
+            </div>
+        </article>`);
+
+        // Desafio Hacker: Confetes se o bot der parabéns
+        if (data.texto.includes("Parabéns") || data.texto.includes("XP")) {
+            // Se você adicionar a lib confetti, chame aqui!
+            console.log("Estourar confetes!");
+        }
+
+    } catch (err) {
+        console.error("Erro na API:", err);
+    } finally {
+        chatInputBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        chatInputBtn.disabled = false;
+        msgArea.scrollTop = msgArea.scrollHeight;
+    }
+}
 
 async function iniciarInterface() {
     try {
@@ -98,6 +150,27 @@ async function iniciarInterface() {
     } catch (erro) {
         console.error("\n❌ ERRO CRÍTICO NO LABORATÓRIO:", erro.message);
         rl.close();
+    }
+}
+
+async function mostrarRanking() {
+    const container = document.getElementById('ranking-container');
+    const lista = document.getElementById('ranking-lista');
+    container.style.display = 'block';
+    lista.innerHTML = "Carregando...";
+
+    try {
+        const res = await fetch('https://SUA-URL-DO-RENDER.com/api/ranking');
+        const dados = await res.json();
+        
+        lista.innerHTML = dados.map((j, i) => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333">
+                <span>${i+1}º ${j.nivel}: <strong>${j.nickname}</strong></span>
+                <span style="color:var(--accent-color)">${j.xp} XP</span>
+            </div>
+        `).join('');
+    } catch (err) {
+        lista.innerHTML = "Erro ao caracher ranking.";
     }
 }
 // Adicione isso na última linha para o programa começar!
