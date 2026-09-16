@@ -29,3 +29,14 @@ app.get('/api/ranking', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Reator rodando na porta ${PORT}`));
+
+// Adicione esta rota no seu server.js
+app.get('/api/health', async (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'conectado' : 'desconectado';
+    res.status(200).json({
+        status: "ok",
+        bancoDeDados: dbStatus,
+        timestamp: new Date().toISOString(),
+        servidor: "online"
+    });
+});

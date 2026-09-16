@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+<div class="header">
+    <h2><i class="fas fa-terminal"></i> OVERFLOWIA_OS v2.0</h2>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span id="health-indicator" style="width: 12px; height: 12px; border-radius: 50%; background: grey;"></span>
+        <button onclick="mostrarRanking()"><i class="fas fa-trophy"></i> RANKING</button>
+    </div>
+</div>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Secreto - IA</title>
@@ -254,6 +262,31 @@
 
         function fecharRanking() {
             document.getElementById('ranking-modal').classList.add('hidden');
+        
+            function fecharRanking() {
+            document.getElementById('ranking-modal').classList.add('hidden');
+        }
+
+        // --- COLE AQUI A FUNÇÃO DE SAÚDE ---
+        async function checkHealth() {
+            const indicator = document.getElementById('health-indicator');
+            // Se o elemento não existir no seu layout, não faz nada para não dar erro
+            if (!indicator) return; 
+
+            try {
+                // API_URL é a variável que você já definiu no topo do seu script
+                const response = await fetch(`${API_URL.replace('/api', '')}/api/health`);
+                indicator.style.background = response.ok ? '#39ff14' : '#ff4444';
+            } catch (err) {
+                indicator.style.background = '#ff4444';
+            }
+        }
+
+        // Chama a função ao carregar a página
+        checkHealth();
+        // Opcional: checa de novo a cada 60 segundos
+        setInterval(checkHealth, 60000);
+        
         }
     </script>
 </body>
