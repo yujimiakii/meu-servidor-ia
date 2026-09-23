@@ -72,6 +72,10 @@ app.get('/api/health', async (req, res) => {
 
 // 10. Inicialização do Servidor (compatível com local e Vercel)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Reator rodando na porta ${PORT}`));
+
+// Não deixa rodar app.listen dentro da Vercel (ela gerencia as portas sozinha)
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => console.log(`🚀 Reator rodando na porta ${PORT}`));
+}
 
 module.exports = app;
