@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<div class="header">
-    <h2><i class="fas fa-terminal"></i> OVERFLOWIA_OS v2.0</h2>
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span id="health-indicator" style="width: 12px; height: 12px; border-radius: 50%; background: grey;"></span>
-        <button onclick="mostrarRanking()"><i class="fas fa-trophy"></i> RANKING</button>
-    </div>
-</div>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório Secreto - IA</title>
@@ -43,7 +35,6 @@
             overflow: hidden;
         }
 
-        /* --- TELA DE LOGIN --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 11, 12, 0.95);
@@ -70,12 +61,11 @@
         button {
             background: var(--primary); color: #000; border: none;
             padding: 12px 25px; border-radius: 5px; cursor: pointer;
-            font-weight: bold; margin-top: 15px; transition: 0.3s; width: 100%;
+            font-weight: bold; margin-top: 15px; transition: 0.3s;
         }
 
         button:hover { background: #fff; box-shadow: 0 0 20px #fff; }
 
-        /* --- CONTAINER PRINCIPAL --- */
         #main-container {
             width: 90%; max-width: 900px; height: 85vh;
             background: var(--bg-panel); border-radius: 15px;
@@ -89,15 +79,14 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        .header h2 { color: var(--primary); font-size: 1.2rem; }
+        .header h2 { color: var(--primary); font-size: 1.1rem; }
 
-        /* --- ÁREA DE MENSAGENS --- */
         #chat-window {
             flex-grow: 1; overflow-y: auto; padding: 25px;
             display: flex; flex-direction: column; gap: 20px;
         }
 
-        .message { max-width: 80%; padding: 15px; border-radius: 10px; line-height: 1.5; position: relative; }
+        .message { max-width: 80%; padding: 15px; border-radius: 10px; line-height: 1.5; }
         
         .user-message {
             align-self: flex-end; background: #21262d;
@@ -111,18 +100,22 @@
 
         .message-header { font-size: 0.7rem; margin-bottom: 8px; opacity: 0.6; text-transform: uppercase; }
 
-        /* --- INPUT --- */
         .input-area {
-            padding: 20px; border-top: 1px solid #30363d;
-            display: flex; gap: 10px; background: #0d1117;
+            padding: 15px 20px; border-top: 1px solid #30363d;
+            display: flex; flex-direction: column; gap: 10px; background: #0d1117;
             border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;
         }
 
-        #pergunta { flex-grow: 1; background: transparent; border: 1px solid #30363d; padding: 15px; color: #fff; border-radius: 8px; }
+        .doc-bar {
+            display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #8b949e;
+        }
+
+        .input-row { display: flex; gap: 10px; }
+
+        #pergunta { flex-grow: 1; background: transparent; border: 1px solid #30363d; padding: 12px; color: #fff; border-radius: 8px; }
 
         .btn-send { width: auto; margin-top: 0; background: var(--primary); }
 
-        /* --- RANKING MODAL --- */
         #ranking-modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 350px; background: var(--bg-panel); border: 2px solid gold;
@@ -137,7 +130,6 @@
         .gold { color: gold; font-weight: bold; }
         .hidden { display: none !important; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
@@ -158,22 +150,29 @@
     <div id="main-container">
         <div class="header">
             <h2><i class="fas fa-terminal"></i> OVERFLOWIA_OS v2.0</h2>
-            <div>
-                <button onclick="mostrarRanking()" style="width: auto; background: gold; padding: 8px 15px;"><i class="fas fa-trophy"></i> RANKING</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="health-indicator" style="width: 12px; height: 12px; border-radius: 50%; background: grey; display: inline-block;"></span>
+                <button onclick="mostrarRanking()" style="width: auto; background: gold; margin-top: 0; padding: 8px 15px;"><i class="fas fa-trophy"></i> RANKING</button>
             </div>
         </div>
 
         <div id="chat-window">
-            <!-- Mensagens aparecem aqui -->
             <div class="message ia-message">
                 <div class="message-header">SISTEMA</div>
-                Olá Cientista. O reator está estável. Aguardando comandos...
+                Olá Cientista. O reator está estável. Você pode enviar perguntas comuns ou carregar um PDF/TXT para consultar como analista corporativo!
             </div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="pergunta" placeholder="Pergunte algo ou tente uma charada..." onkeypress="if(event.key==='Enter') enviarMsg()">
-            <button class="btn-send" onclick="enviarMsg()"><i class="fas fa-paper-plane"></i></button>
+            <!-- Barra de upload RAG -->
+            <div class="doc-bar">
+                <label><input type="checkbox" id="modoDoc"> <strong>Modo Analista RAG</strong></label>
+                <input type="file" id="docUpload" accept=".pdf, .txt" style="color: #fff; font-size: 0.8rem;">
+            </div>
+            <div class="input-row">
+                <input type="text" id="pergunta" placeholder="Pergunte algo ou tire dúvida sobre o documento..." onkeypress="if(event.key==='Enter') enviarMsg()">
+                <button class="btn-send" onclick="enviarMsg()"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
 
@@ -181,31 +180,48 @@
     <div id="ranking-modal" class="hidden">
         <h2 style="text-align: center; color: gold; margin-bottom: 15px;"><i class="fas fa-crown"></i> HALL DA FAMA</h2>
         <div id="ranking-corpo"></div>
-        <button onclick="fecharRanking()" style="background: var(--danger); color: white;">FECHAR</button>
+        <button onclick="fecharRanking()" style="background: var(--danger); color: white; width: 100%;">FECHAR</button>
     </div>
 
     <script>
         let userNick = "";
-        const API_URL = "http://localhost:3000/api";
-
-        function entrarNoSistema() {
+        let authToken = "";
+// Usa a URL atual do site automaticamente (funciona tanto local quanto no Vercel)
+const API_URL = window.location.origin + "/api";
+        async function entrarNoSistema() {
             const input = document.getElementById('nickname');
-            if(input.value.trim().length < 3) return alert("Nickname muito curto!");
-            userNick = input.value;
-            document.getElementById('login-screen').classList.add('hidden');
+            if (input.value.trim().length < 3) return alert("Nickname muito curto!");
+            userNick = input.value.trim();
+
+            try {
+                // Obtém o token JWT
+                const res = await fetch(`${API_URL}/auth/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname: userNick })
+                });
+                const data = await res.json();
+                authToken = data.token;
+
+                document.getElementById('login-screen').classList.add('hidden');
+                checkHealth();
+            } catch (err) {
+                alert("Erro ao autenticar no laboratório!");
+            }
         }
 
         async function enviarMsg() {
             const input = document.getElementById('pergunta');
+            const fileInput = document.getElementById('docUpload');
+            const modoDoc = document.getElementById('modoDoc').checked;
             const chatWindow = document.getElementById('chat-window');
             const texto = input.value.trim();
 
-            if(!texto) return;
+            if (!texto) return;
 
-            // Renderizar pergunta do usuário
             chatWindow.innerHTML += `
                 <div class="message user-message">
-                    <div class="message-header">${userNick}</div>
+                    <div class="message-header">${userNick} ${modoDoc ? '(Consulta Doc)' : ''}</div>
                     ${texto}
                 </div>
             `;
@@ -214,30 +230,57 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
             try {
-                const response = await fetch(`${API_URL}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pergunta: texto, nickname: userNick })
-                });
+                let response;
+
+                if (modoDoc) {
+                    if (!fileInput.files[0]) {
+                        alert("Por favor, selecione um arquivo PDF ou TXT!");
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("arquivo", fileInput.files[0]);
+                    formData.append("pergunta", texto);
+
+                    // Envio com FormData e Token JWT na rota do RAG
+                    response = await fetch(`${API_URL}/chat/documento`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: formData
+                    });
+                } else {
+                    // Chat normal da Sprint anterior
+                    response = await fetch(`${API_URL}/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pergunta: texto, nickname: userNick })
+                    });
+                }
 
                 const data = await response.json();
 
-                // Renderizar resposta da IA
-                const htmlResposta = marked.parse(data.resposta);
+                if (!response.ok) {
+                    throw new Error(data.erro || "Erro na resposta do servidor");
+                }
+
+                const respostaFinal = data.resposta || data.texto;
+                const htmlResposta = marked.parse(respostaFinal);
+
                 chatWindow.innerHTML += `
                     <div class="message ia-message">
-                        <div class="message-header">CIENTISTA_IA</div>
+                        <div class="message-header">${modoDoc ? 'ANALISTA_CORPORATIVO' : 'CIENTISTA_IA'}</div>
                         ${htmlResposta}
                     </div>
                 `;
 
-                // Efeito de Confete se ganhar XP
-                if(data.resposta.toLowerCase().includes("acertou") || data.resposta.toLowerCase().includes("ganhou")) {
+                if (respostaFinal.toLowerCase().includes("acertou") || respostaFinal.toLowerCase().includes("ganhou")) {
                     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#39ff14', '#ffffff'] });
                 }
 
             } catch (err) {
-                chatWindow.innerHTML += `<div class="message" style="color:red">Erro crítico: Servidor offline.</div>`;
+                chatWindow.innerHTML += `<div class="message" style="color:red">Erro: ${err.message}</div>`;
             }
             
             chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -257,37 +300,28 @@
                 `).join('');
 
                 document.getElementById('ranking-modal').classList.remove('hidden');
-            } catch (err) { alert("Não foi possível carregar o ranking."); }
+            } catch (err) { 
+                alert("Não foi possível carregar o ranking."); 
+            }
         }
 
         function fecharRanking() {
             document.getElementById('ranking-modal').classList.add('hidden');
-        
-            function fecharRanking() {
-            document.getElementById('ranking-modal').classList.add('hidden');
         }
 
-        // --- COLE AQUI A FUNÇÃO DE SAÚDE ---
         async function checkHealth() {
             const indicator = document.getElementById('health-indicator');
-            // Se o elemento não existir no seu layout, não faz nada para não dar erro
             if (!indicator) return; 
 
             try {
-                // API_URL é a variável que você já definiu no topo do seu script
-                const response = await fetch(`${API_URL.replace('/api', '')}/api/health`);
+                const response = await fetch(`${API_URL}/health`);
                 indicator.style.background = response.ok ? '#39ff14' : '#ff4444';
             } catch (err) {
                 indicator.style.background = '#ff4444';
             }
         }
 
-        // Chama a função ao carregar a página
-        checkHealth();
-        // Opcional: checa de novo a cada 60 segundos
         setInterval(checkHealth, 60000);
-        
-        }
     </script>
 </body>
 </html>
