@@ -1,38 +1,34 @@
+// 1. Bibliotecas
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const path = require('path');
+require('dotenv').config();
 
-// Permite servir o HTML e arquivos estáticos
-app.use(express.static(path.join(__dirname)));
+// 2. CRIAÇÃO DO APP (precisa vir ANTES de qualquer app.use!)
+const app = express();
 
-// Entrega o index.html na raiz
+// 3. Middlewares e arquivos estáticos
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname))); // Serve o index.html e arquivos da pasta
+
+// 4. Rota raiz para abrir a interface web
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-// 1. Importação das rotas
-const chatRoutes = require('./routes/chatRoutes');
-const documentRoutes = require('./routes/documentRoutes'); // Rota RAG da Sprint 6
-const Jogador = require('./models/Jogador');
 
-const app = express();
-
-// 2. Middlewares essenciais
-app.use(cors());
-app.use(express.json());
-
-// Conexão com o Banco de Dados protegida contra crash
+// 5. Conexão com o Banco de Dados (segura contra crash)
 if (!process.env.MONGO_URI) {
-    console.error("❌ AVISO CRÍTICO: Variável MONGO_URI não foi configurada!");
+    console.error("❌ AVISO: Variável MONGO_URI não foi configurada no .env!");
 } else {
     mongoose.connect(process.env.MONGO_URI)
         .then(() => console.log("🧪 Conectado ao MongoDB do Laboratório"))
         .catch(err => console.error("❌ Erro ao conectar ao banco:", err.message));
 }
 
-// 4. Rota para gerar Token JWT (necessário para liberar a leitura de documentos)
+// 6. Rota para gerar Token JWT
 app.post('/api/auth/token', (req, res) => {
     const { nickname } = req.body;
     if (!nickname) {
@@ -45,19 +41,15 @@ app.post('/api/auth/token', (req, res) => {
     return res.json({ token });
 });
 
-// Servir arquivos estáticos da pasta raiz (como index.html, imagens, etc.)
-app.use(express.static(path.join(__dirname)));
+// 7. Registro das Rotas da Aplicação
+const chatRoutes = require('./routes/chatRoutes');
+const documentRoutes = require('./routes/documentRoutes');
+const Jogador = require('./models/Jogador');
 
-// Rota raiz para abrir a interface web
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.use('/api/chat', chatRoutes);
+app.use('/api/chat/documento', documentRoutes); // Sprint 6 RAG
 
-// 5. Registro das Rotas da Aplicação
-app.use('/api/chat', chatRoutes);                    // Conversa normal + ferramentas
-app.use('/api/chat/documento', documentRoutes);      // Sprint 6: RAG com PDF/TXT e proteção JWT
-
-// 6. Rota do Ranking (Sprint 2)
+// 8. Rota do Ranking
 app.get('/api/ranking', async (req, res) => {
     try {
         const top = await Jogador.find().sort({ xp: -1 }).limit(10);
@@ -67,7 +59,7 @@ app.get('/api/ranking', async (req, res) => {
     }
 });
 
-// 7. Rota de Saúde do Servidor (Health Check)
+// 9. Rota de Saúde (Health Check)
 app.get('/api/health', async (req, res) => {
     const dbStatus = mongoose.connection.readyState === 1 ? 'conectado' : 'desconectado';
     res.status(200).json({
@@ -78,13 +70,8 @@ app.get('/api/health', async (req, res) => {
     });
 });
 
-
-
-// 8. Inicialização do Servidor
-// Substitua o app.listen pelo formato compatível abaixo:
+// 10. Inicialização do Servidor (compatível com local e Vercel)
 const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`🚀 Reator rodando na porta ${PORT}`));
-}
+app.listen(PORT, () => console.log(`🚀 Reator rodando na porta ${PORT}`));
 
 module.exports = app;

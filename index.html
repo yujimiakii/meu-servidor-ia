@@ -186,8 +186,13 @@
     <script>
         let userNick = "";
         let authToken = "";
-// Usa a URL atual do site automaticamente (funciona tanto local quanto no Vercel)
-const API_URL = window.location.origin + "/api";
+
+        // DETECÇÃO AUTOMÁTICA DE URL:
+        // Se estiver abrindo via Live Server (portas 5500, 5501, etc.), aponta para a porta 3000 do Node.
+        // Se estiver no Vercel ou acessando direto http://localhost:3000, usa a URL do próprio domínio.
+        const isLiveServer = window.location.port.startsWith("55") || window.location.protocol === "file:";
+        const API_URL = isLiveServer ? "http://localhost:3000/api" : window.location.origin + "/api";
+
         async function entrarNoSistema() {
             const input = document.getElementById('nickname');
             if (input.value.trim().length < 3) return alert("Nickname muito curto!");
@@ -200,13 +205,19 @@ const API_URL = window.location.origin + "/api";
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nickname: userNick })
                 });
+
+                if (!res.ok) {
+                    const erroJson = await res.json();
+                    throw new Error(erroJson.erro || "Falha ao obter credencial.");
+                }
+
                 const data = await res.json();
                 authToken = data.token;
 
                 document.getElementById('login-screen').classList.add('hidden');
                 checkHealth();
             } catch (err) {
-                alert("Erro ao autenticar no laboratório!");
+                alert("Erro ao autenticar no laboratório: " + err.message);
             }
         }
 
